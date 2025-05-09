@@ -1,8 +1,13 @@
-
+import os
+from datetime import datetime
 
 accounts={}
 account_number=1001
-balance={}
+
+def trans():
+    with open("transaction.txt","a")as file:
+        time=datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        file.write(f"{time}-{account_number}{amount}{balance}") 
 def get_customer_info():
     customer_name =input("Enter the name:")
     customer_address =input("Enter the address:")
@@ -18,83 +23,95 @@ def create_customer(customer_name,customer_address,email_id,user_name,password):
     coustomer_info=f"{customer_name},{customer_address},{email_id}/n"
     user_info=f"{user_name},{password}/n"
 
-    with open("customers.txt","a")as customers_file:
+    with open("customers.txt","w")as customers_file:
         customers_file.write(coustomer_info)
         
-    with open("user.txt","a")as user_file:
+    with open("user.txt","w")as user_file:
         user_file.write(user_info)
 
-def create_account():
+def account_saving():
     global account_number
+    with open("account.txt","w")as file:
+        file.write(f"{account_number},{data["username"]},{data["password"]},{data["email_id"]},{data["balance"]}")
+
+def create_account():
+    # global account_number
+    # global accounts
     name=input("Enter the account holder name:")
-    if account_number in accounts:
-        print("account not found")
-        return
     try:
         balance=float(input("Enter initial balance:"))
         if balance<500:
             print("initial amount must be greater than 500 ")
-        return
+            return
     except ValueError:  
         print("invalid number")
-    return
+        return
     accounts[account_number]= {
         "name":name,
         "balance":balance
         }
+    account_saving()
     print('Account created successfully!')
     account_number +=1
-
-def account_saving():
-    global account_number
-    with open("account.txt","a")as file:
-        if account_number in accounts:
-            file.write(f"{accounts['username']},{accounts['password']}\n")
-        print("Account saving successfully!")
-
 
 
 
 def deposit():
-    account=input("Enter the account number:")
-    if account not in accounts:
-        print("account not found:")
+    try:
+        account=input("Enter the account number:")
+        if account not in accounts:
+            print("account not found:")
         amount=float(input("Enter the deposit amount:"))
-    if amount <= 0:
-        print("deposit amount. Must be positive number.")
-        return balance
-    balance += amount
-    print(f"deposit successfully!,{amount}.new balance:{balance}")
+        if amount <= 0:
+         print("deposit amount. Must be positive number.")
+         return balance
+        accounts[account_number][balance] += amount
+        account_saving()
+        trans()
+        print(f"deposit successfully!,{amount}.new balance:{balance}")
+    except ValueError:
+        print("invalid input")
 
-    return balance
 
 
 def withdraw():
     account=input("Enter the account number:")
     if account not in accounts:
         print("account not found:")
-        amount=float(input("Enter thr withdraw amount:"))
-        if amount <= 0:
-            print("invalid amount. Must be greater than 0.")
+    amount=float(input("Enter thr withdraw amount:"))
+    if amount <= 0:
+        print("invalid amount. Must be greater than 0.")
         return
-    if account[account[balance]]<amount:
+    if account[account_number][balance]<amount:
         print("insufficient funds.")
-    else:
-        print(f"withdraw successfully!,{amount}.currentbalance:{balance}")
-    return balance
 
+    accounts[account_number][balance]-=amount
+    account_saving()
+    trans()
+    print(f"withdraw successfully!,{amount}.currentbalance:{balance}")
+    
 
 def check_balance():
-    input("Enter the acount_number:")
-    if account_number in accounts:
-        print("your current balance is: {balance}")
+    account=int(input("Enter the acount_number:"))
+    if account in accounts:
+        print(f"your current balance is: {accounts[account_number]['balance']}")
+    else:
+        print("account not found!")
 
 
+def transaction_history():
+   account= input("Enter the account number:")
+   with open("transaction.txt","a")as file:
+       if not os.path.exists("transaction"):
+           print("Not any transaction")
+           return
+       else:
+            with open("transaction.txt","r")as file:
+                for line in file:
+                    if line.strip().split("-")[1]==str(account):
+                        print(line.strip)
+                        
 
-def transaction_history(deposit,withdraw):
-    input("Enter the account number:")
-    if account_number in accounts:
-        print("transaction_history:")
 
 def main_menu():
     while True:
